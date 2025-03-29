@@ -22,7 +22,6 @@ sequenceDiagram
     participant Gemini
     participant MCP Server
 
-    Note right of MCP_Client: Initialization & Tool Registration
     App->>MCP_Client: Create Client Instance
     MCP_Client->>MCP Server: get_available_tools()
     MCP Server-->>MCP_Client: Return Tool List
