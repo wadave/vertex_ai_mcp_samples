@@ -89,18 +89,11 @@ sequenceDiagram
 
 # Folder
 ```dotnetcli
-├── asset
-│   └── mcp_tool_call.png
 ├── create_mcp_server_by_gemini.ipynb
 ├── intro_to_MCP_with_vertexai.ipynb
 ├── README.md
 ├── server
-│   ├── bq.py
-│   ├── med.py
-│   ├── nih.py
-│   └── weather_server.py
-└── util
-    └── util.py
+
 ```
 
 # Notebooks
