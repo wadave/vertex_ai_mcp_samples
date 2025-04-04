@@ -3,9 +3,9 @@ The Model Context Protocol (MCP) is an open standard that streamlines the integr
 
 Developers have the option to use third-party MCP servers or create custom ones when building applications. 
 
-The below shows the comparison between MCP tool call vs native tool call.
+The below shows the comparison between MCP workflow vs native tool call.
 
-## MCP tool call
+## MCP Sequence Diagram
 
 ```mermaid
 %%{
@@ -21,14 +21,15 @@ The below shows the comparison between MCP tool call vs native tool call.
 sequenceDiagram
     participant User
     participant App
-    participant MCP_Client
     participant Gemini
+    participant MCP_Client
     participant MCP Server
 
     App->>MCP_Client: Create Client Instance
     MCP_Client->>MCP Server: get_available_tools()
     MCP Server-->>MCP_Client: Return Tool List
-    MCP_Client->>Gemini: Get Tool Definition
+    MCP_Client-->>App: Return Tool List
+    App->>Gemini:Tool Definition
     
     loop Agentic Loop
         User->>App: Enter Prompt
