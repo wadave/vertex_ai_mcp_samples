@@ -1,126 +1,107 @@
+from typing import Any, Optional
 import httpx
 import xml.etree.ElementTree as ET
-from typing import Optional, Dict, Any
+import urllib.parse
 from mcp.server.fastmcp import FastMCP
 
 # Initialize FastMCP server
-mcp = FastMCP("medlineplus")
+mcp = FastMCP(name="medlineplus", version="1.0.0")
 
 # Constants
-MEDLINEPLUS_API_BASE = "https://wsearch.nlm.nih.gov/ws/query"
-USER_AGENT = "mcp-medlineplus-tool/1.0"
+API_BASE_URL = "https://wsearch.nlm.nih.gov/ws/query"
+USER_AGENT = (
+    "mcp-medlineplus-server/1.0 (MCP Example; contact: info@modelcontextprotocol.io)"
+)
 
 
-async def make_medlineplus_request(
-    term: str, db: str = "healthTopics", rettype: str = "brief"
-) -> Optional[ET.Element]:
-    """Make a request to the MedlinePlus API and return the parsed XML root element."""
-    params = {"db": db, "term": term, "rettype": rettype}
-    headers = {
-        "User-Agent": USER_AGENT,
-        "Accept": "application/xml",  # Explicitly request XML
-    }
+async def make_api_request(term: str) -> Optional[str]:
+    """Makes a request to the MedlinePlus API and returns the XML response as text."""
+    encoded_term = urllib.parse.quote_plus(term)
+    url = f"{API_BASE_URL}?db=healthTopics&term={encoded_term}&rettype=brief&retmax=1"
+    headers = {"User-Agent": USER_AGENT, "Accept": "application/xml"}
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get(
-                MEDLINEPLUS_API_BASE, params=params, headers=headers, timeout=30.0
-            )
+            response = await client.get(url, headers=headers, timeout=30.0)
             response.raise_for_status()  # Raise an exception for bad status codes
-            # Ensure content type is XML before parsing
-            content_type = response.headers.get("content-type", "").lower()
-            if "xml" not in content_type:
-                print(f"Unexpected content type: {content_type}. Expected XML.")
-                # Try parsing anyway, or handle as error
-                # return None
-            xml_content = response.text
-            if not xml_content:
-                print("Received empty response body.")
-                return None
-            # Parse XML content
-            root = ET.fromstring(xml_content)
-            return root
-    except ET.ParseError as e:
-        print(
-            f"Error parsing XML: {e}\nContent: {xml_content[:500]}..."
-        )  # Log first 500 chars
+            return response.text
+    except httpx.RequestError as e:
+        print(f"HTTP Request failed: {e}")
         return None
     except httpx.HTTPStatusError as e:
-        print(f"HTTP error occurred: {e.response.status_code} - {e.request.url}")
-        return None
-    except httpx.RequestError as e:
-        print(f"An error occurred while requesting {e.request.url!r}: {e}")
+        print(f"HTTP Status error: {e.response.status_code} - {e.response.text}")
         return None
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
+        print(f"An unexpected error occurred during API request: {e}")
         return None
 
 
-def parse_medlineplus_response(root: ET.Element) -> Optional[str]:
-    """Parse the XML root element and extract the first result's information."""
+def parse_medlineplus_response(xml_text: str) -> str:
+    """Parses the XML response and extracts relevant information."""
     try:
-        list_element = root.find("list")
-        if list_element is None:
-            print("No 'list' element found in XML.")
-            # Check for spelling correction
-            spelling_correction = root.find("spellingCorrection")
-            if spelling_correction is not None and spelling_correction.text:
-                return f"Did you mean: {spelling_correction.text}?"
-            return "No results found."
+        root = ET.fromstring(xml_text)
 
-        first_doc = list_element.find("document")
+        # Check for spelling correction
+        spelling_correction = root.findtext("spellingCorrection")
+        if spelling_correction:
+            return f"Did you mean '{spelling_correction}'? Please try searching again with the corrected term."
+
+        # Check result count
+        count_text = root.findtext("count")
+        if count_text is None or int(count_text) == 0:
+            return "No information found for that medical term."
+
+        # Get the first document
+        first_doc = root.find(".//list/document")
         if first_doc is None:
-            print("No 'document' element found in list.")
-            return "No results found."
+            return "Could not find the result document in the response."
 
-        content_data: Dict[str, str] = {}
+        title = "Not Available"
+        snippet = "Not Available"
+
+        # Extract title and snippet
         for content in first_doc.findall("content"):
-            name = content.get("name")
-            text = "".join(
-                content.itertext()
-            ).strip()  # Get all text within the element
-            if name and text:
-                content_data[name] = text
+            if content.get("name") == "title":
+                # Remove highlighting tags like <span class="qt0">...
+                title_element = ET.fromstring(f"<root>{content.text}</root>")
+                title = "".join(title_element.itertext()).strip()
+            elif content.get("name") == "snippet":
+                # Remove highlighting tags and clean up snippet
+                snippet_element = ET.fromstring(f"<root>{content.text}</root>")
+                snippet_parts = [
+                    part.strip()
+                    for part in snippet_element.itertext()
+                    if part and part.strip()
+                ]
+                snippet = " ".join(snippet_parts).strip()
 
-        title = content_data.get("title", "N/A")
-        summary = content_data.get("FullSummary")  # Prioritize FullSummary
-        if not summary:
-            summary = content_data.get("snippet")  # Fallback to snippet
+        if title == "Not Available" and snippet == "Not Available":
+            return "Found a result, but could not extract title or snippet."
 
-        if not summary:
-            summary = "No summary or snippet available."
+        return f"Term: {title}\n\nExplanation: {snippet}"
 
-        # Basic cleanup of excessive whitespace potentially left by HTML tags
-        summary = " ".join(summary.split())
-
-        return f"Term: {title}\nExplanation: {summary}"
-
+    except ET.ParseError as e:
+        print(f"Failed to parse XML: {e}")
+        return "Error: Could not parse the response from the medical dictionary."
     except Exception as e:
-        print(f"Error parsing document content: {e}")
-        return "Error extracting information from the result."
+        print(f"An unexpected error occurred during XML parsing: {e}")
+        return "Error: An unexpected error occurred while processing the response."
 
 
 @mcp.tool()
-async def get_medical_term(medical_term: str) -> str:
-    """Fetches the explanation for a given medical term from MedlinePlus.
+async def get_medical_term(term: str) -> str:
+    """Get the explanation for a medical term from MedlinePlus.
 
     Args:
-        medical_term: The medical term to search for.
+        term: The medical term to search for.
     """
-    print(f"Searching MedlinePlus for: {medical_term}")
-    xml_root = await make_medlineplus_request(
-        term=medical_term, rettype="brief"
-    )  # Using brief first for conciseness
+    xml_response = await make_api_request(term)
+    if xml_response is None:
+        return "Error: Failed to retrieve data from the MedlinePlus service."
 
-    if xml_root is None:
-        return "Failed to retrieve information from MedlinePlus."
-
-    result = parse_medlineplus_response(xml_root)
-    if result is None:
-        return "Failed to parse the response from MedlinePlus."
-
-    print(f"Result for '{medical_term}':\n{result}")
-    return result
+    explanation = parse_medlineplus_response(xml_response)
+    return explanation
 
 
 if __name__ == "__main__":
+    # Run the server using standard I/O
     mcp.run(transport="stdio")
