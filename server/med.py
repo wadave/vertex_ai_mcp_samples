@@ -1,107 +1,92 @@
-from typing import Any, Optional
 import httpx
 import xml.etree.ElementTree as ET
-import urllib.parse
+from typing import Optional
 from mcp.server.fastmcp import FastMCP
 
-# Initialize FastMCP server
-mcp = FastMCP(name="medlineplus", version="1.0.0")
+mcp = FastMCP("medlineplus")
 
-# Constants
-API_BASE_URL = "https://wsearch.nlm.nih.gov/ws/query"
-USER_AGENT = (
-    "mcp-medlineplus-server/1.0 (MCP Example; contact: info@modelcontextprotocol.io)"
-)
+MEDLINEPLUS_API_URL = "https://wsearch.nlm.nih.gov/ws/query"
 
 
-async def make_api_request(term: str) -> Optional[str]:
-    """Makes a request to the MedlinePlus API and returns the XML response as text."""
-    encoded_term = urllib.parse.quote_plus(term)
-    url = f"{API_BASE_URL}?db=healthTopics&term={encoded_term}&rettype=brief&retmax=1"
-    headers = {"User-Agent": USER_AGENT, "Accept": "application/xml"}
+async def make_medlineplus_request(term: str) -> Optional[str]:
+    """Makes a request to the MedlinePlus API and returns the XML response as a string."""
+    params = {
+        "db": "healthTopics",
+        "term": term,
+        "rettype": "brief",  # Get summary and snippets
+        "retmax": 1,  # Limit to the most relevant result
+    }
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get(url, headers=headers, timeout=30.0)
+            response = await client.get(
+                MEDLINEPLUS_API_URL, params=params, timeout=30.0
+            )
             response.raise_for_status()  # Raise an exception for bad status codes
             return response.text
-    except httpx.RequestError as e:
-        print(f"HTTP Request failed: {e}")
-        return None
     except httpx.HTTPStatusError as e:
-        print(f"HTTP Status error: {e.response.status_code} - {e.response.text}")
+        print(f"HTTP error occurred: {e}")
         return None
     except Exception as e:
-        print(f"An unexpected error occurred during API request: {e}")
+        print(f"An error occurred during the MedlinePlus request: {e}")
         return None
 
 
-def parse_medlineplus_response(xml_text: str) -> str:
-    """Parses the XML response and extracts relevant information."""
+def parse_summary_from_xml(xml_string: str) -> Optional[str]:
+    """Parses the XML response and extracts the FullSummary content."""
     try:
-        root = ET.fromstring(xml_text)
+        root = ET.fromstring(xml_string)
+        list_element = root.find("list")
+        if list_element is None:
+            return None
 
-        # Check for spelling correction
-        spelling_correction = root.findtext("spellingCorrection")
-        if spelling_correction:
-            return f"Did you mean '{spelling_correction}'? Please try searching again with the corrected term."
+        first_document = list_element.find("document")
+        if first_document is None:
+            # Check for spelling suggestions if no direct hit
+            spelling_correction = root.find("spellingCorrection")
+            if spelling_correction is not None and spelling_correction.text:
+                return f"Did you mean: {spelling_correction.text}?"
+            return None
 
-        # Check result count
-        count_text = root.findtext("count")
-        if count_text is None or int(count_text) == 0:
-            return "No information found for that medical term."
-
-        # Get the first document
-        first_doc = root.find(".//list/document")
-        if first_doc is None:
-            return "Could not find the result document in the response."
-
-        title = "Not Available"
-        snippet = "Not Available"
-
-        # Extract title and snippet
-        for content in first_doc.findall("content"):
-            if content.get("name") == "title":
-                # Remove highlighting tags like <span class="qt0">...
-                title_element = ET.fromstring(f"<root>{content.text}</root>")
-                title = "".join(title_element.itertext()).strip()
-            elif content.get("name") == "snippet":
-                # Remove highlighting tags and clean up snippet
-                snippet_element = ET.fromstring(f"<root>{content.text}</root>")
-                snippet_parts = [
-                    part.strip()
-                    for part in snippet_element.itertext()
-                    if part and part.strip()
-                ]
-                snippet = " ".join(snippet_parts).strip()
-
-        if title == "Not Available" and snippet == "Not Available":
-            return "Found a result, but could not extract title or snippet."
-
-        return f"Term: {title}\n\nExplanation: {snippet}"
-
+        # Find the content element with name="FullSummary"
+        for content in first_document.findall("content"):
+            if content.get("name") == "FullSummary":
+                # Extract text content, trying to handle potential inner tags simply
+                summary_text = "".join(content.itertext()).strip()
+                if summary_text:
+                    return summary_text
+        return None  # No summary found
     except ET.ParseError as e:
-        print(f"Failed to parse XML: {e}")
-        return "Error: Could not parse the response from the medical dictionary."
+        print(f"XML parsing error: {e}")
+        return None
     except Exception as e:
-        print(f"An unexpected error occurred during XML parsing: {e}")
-        return "Error: An unexpected error occurred while processing the response."
+        print(f"An error occurred during XML parsing: {e}")
+        return None
 
 
 @mcp.tool()
-async def get_medical_term(term: str) -> str:
-    """Get the explanation for a medical term from MedlinePlus.
+async def get_medical_term(medical_term: str) -> str:
+    """Get the explanation for a specific medical term from MedlinePlus.
 
     Args:
-        term: The medical term to search for.
+        medical_term: The medical term to search for.
     """
-    xml_response = await make_api_request(term)
-    if xml_response is None:
-        return "Error: Failed to retrieve data from the MedlinePlus service."
+    print(f"Searching MedlinePlus for term: {medical_term}")
+    xml_response = await make_medlineplus_request(medical_term)
 
-    explanation = parse_medlineplus_response(xml_response)
-    return explanation
+    if not xml_response:
+        return "Failed to retrieve information from MedlinePlus."
+
+    summary = parse_summary_from_xml(xml_response)
+
+    if summary:
+        # Check if it's a spelling suggestion
+        if summary.startswith("Did you mean:"):
+            return summary
+        # Format the summary slightly for better readability if needed
+        return f"Explanation for '{medical_term}':\n\n{summary}"
+    else:
+        return f"Could not find a definition or summary for '{medical_term}' on MedlinePlus."
 
 
 if __name__ == "__main__":
-    # Run the server using standard I/O
     mcp.run(transport="stdio")
