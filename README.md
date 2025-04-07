@@ -49,7 +49,7 @@ sequenceDiagram
     end
 ```
 
-## Native tool call
+## Traditional tool calling
 
 ```mermaid
 %%{
