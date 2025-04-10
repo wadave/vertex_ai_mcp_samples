@@ -1,5 +1,8 @@
 ## An ADK Agent integrated with MCP Client
-This web application was developed using Google's ADK (Agent Development Kit) and MCP (Model Context Protocal). Specifically, the Agent relies on the Google ADK. A local MCP server instance, established using custom server code designed for cocktail data management, facilitates data retrieval. The web application acts as an MCP client to fetch cocktail information via this local server. 
+This web application was developed using Google's ADK (Agent Development Kit) and MCP (Model Context Protocal). Specifically, the Agent relies on the Google ADK. A local MCP server instance, established using custom server code designed for cocktail data management, facilitates data retrieval. The web application acts as an MCP client to fetch cocktail information via this local server.
+
+Screenshot:
+<img src="../asset/adk_app.png" alt="Descriptive alt text" width="700" /> 
 
 ### Create & Activate Virtual Environment (Recommended):
 
@@ -62,3 +65,4 @@ GOOGLE_CLOUD_LOCATION="us-central1"
 uvicorn main:app --reload
 ```
 
+The example shows you can chat with the app to get cocktail details from the cocktail db website via a local MCP server.
