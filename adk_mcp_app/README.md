@@ -32,7 +32,7 @@ your_project_folder/  # Project folder
 ```
 ### Run the app
 Start the Fast API: Run the following command to start CLI interface with `adk_mcp_app` folder
-1. Set up vales in `.env ` file
+1. Set up values in `.env ` file
 
 Create a .env file with the following contents:
 ```
