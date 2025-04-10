@@ -21,11 +21,18 @@ from google.adk.artifacts.in_memory_artifact_service import InMemoryArtifactServ
 load_dotenv()
 
 APP_NAME = "ADK MCP example"
+STATIC_DIR = Path("static")
+
 session_service = InMemorySessionService()
 artifacts_service = InMemoryArtifactService()
 
+ct_server_params = StdioServerParameters(
+    command="python",
+    args=["./mcp_server/cocktail.py"],
+)
 
-async def get_tools_async(server_params):
+
+async def get_tools_async(server_params: StdioServerParameters):
     """Gets tools from MCP Server."""
     tools, exit_stack = await MCPToolset.from_server(connection_params=server_params)
     # MCP requires maintaining a connection to the local MCP Server.
@@ -33,7 +40,7 @@ async def get_tools_async(server_params):
     return tools, exit_stack
 
 
-async def get_agent_async(server_params):
+async def get_agent_async(server_params: StdioServerParameters):
     """Creates an ADK Agent with tools from MCP Server."""
     tools, exit_stack = await get_tools_async(server_params)
     root_agent = LlmAgent(
@@ -44,16 +51,12 @@ async def get_agent_async(server_params):
     )
     return root_agent, exit_stack
 
-ct_server_params = StdioServerParameters(
-    command="python",
-    args=["./mcp_server/cocktail.py"],
-)
 
-
-async def run_agent(server_params, session_id, question):
-    query = question
-    print("[user]: ", query)
-    content = types.Content(role="user", parts=[types.Part(text=query)])
+async def run_agent(
+    server_params: StdioServerParameters, session_id: str, question: str
+):
+    """Runs the ADK agent for a given question and returns the response."""
+    content = types.Content(role="user", parts=[types.Part(text=question)])
     root_agent, exit_stack = await get_agent_async(server_params)
     runner = Runner(
         app_name=APP_NAME,
@@ -75,8 +78,10 @@ async def run_agent(server_params, session_id, question):
     return response
 
 
-async def run_adk_agent_async(websocket, server_params, session_id):
-    """Client to agent communication"""
+async def run_adk_agent_async(
+    websocket: WebSocket, server_params: StdioServerParameters, session_id: str
+):
+    """Handles client-to-agent communication over WebSocket."""
     try:
         # Your existing setup for the agent might be here
         logging.info(f"Agent task started for session {session_id}")
@@ -89,21 +94,23 @@ async def run_adk_agent_async(websocket, server_params, session_id):
             ai_message = "\n".join(response)
             await websocket.send_text(json.dumps({"message": ai_message}))
             await asyncio.sleep(0)
-            
+
     except WebSocketDisconnect:
         # This block executes when the client disconnects
         logging.info(f"Client {session_id} disconnected.")
     except Exception as e:
         # Catch other potential errors in your agent logic
-        logging.error(f"Error in agent task for session {session_id}: {e}", exc_info=True)
+        logging.error(
+            f"Error in agent task for session {session_id}: {e}", exc_info=True
+        )
     finally:
         logging.info(f"Agent task ending for session {session_id}")
-       
+
+
 # FastAPI web app
 
 app = FastAPI()
 
-STATIC_DIR = Path("static")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
@@ -123,7 +130,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: int):
 
     # Start agent session
     session_id = str(session_id)
-    session = session_service.create_session(
+    session_service.create_session(
         app_name=APP_NAME, user_id=session_id, session_id=session_id, state={}
     )
 
