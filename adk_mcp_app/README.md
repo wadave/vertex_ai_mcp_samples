@@ -16,7 +16,7 @@ source .venv/bin/activate
 ```
 pip install google-adk fastapi
 ```
-1. Project Structure
+
 The project folder structure:
 
 ```
