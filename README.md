@@ -94,7 +94,7 @@ sequenceDiagram
 ├── intro_to_MCP_with_vertexai.ipynb
 ├── README.md
 ├── server
-
+├── adk_mcp_app
 ```
 
 # Notebooks
