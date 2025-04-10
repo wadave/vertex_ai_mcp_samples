@@ -17,7 +17,7 @@ source .venv/bin/activate
 pip install google-adk fastapi
 ```
 1. Project Structure
-Create the following folder structure with empty files:
+The project folder structure:
 
 ```
 your_project_folder/  # Project folder
@@ -31,7 +31,7 @@ your_project_folder/  # Project folder
         └── index.html
 ```
 ### Run the app
-Start the Fast API: Run the following command to start CLI interface with `adk_mcp_app` folder
+Start the Fast API: Run the following command within the `adk_mcp_app` folder
 1. Set up values in `.env ` file
 
 Create a .env file with the following contents:
@@ -60,7 +60,7 @@ GOOGLE_CLOUD_PROJECT=YOUR_VALUE_HERE
 GOOGLE_CLOUD_LOCATION="us-central1"
 ```
 
-1.  Run the below command
+2.  Run the below command
 
 ```
 uvicorn main:app --reload
