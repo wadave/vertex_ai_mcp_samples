@@ -50,7 +50,7 @@ async def get_agent_async(server_params: StdioServerParameters):
      - Please format your response using Markdown to make it easy to read and understand.
     """
     root_agent = LlmAgent(
-        model="gemini-2.0-flash-lite",  # "gemini-2.5-pro-preview-03-25"
+        model="gemini-2.0-flash",  # "gemini-2.5-pro-preview-03-25"
         name="ai_assistant",
         instruction=agent_instruction,
         tools=tools,

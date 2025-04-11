@@ -4,255 +4,56 @@
 <head>
     <title>ADK MCP App </title>
     <style>
-        /* CSS Styles remain the same as the previous 'alternating' version */
         /* Apply Arial font to the whole page */
-        body {
-            /* Make body take full viewport size */
-            margin: 0;
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-            flex-direction: column;
+        body { margin: 0; height: 100vh; width: 100vw; display: flex; flex-direction: column; font-family: Arial, sans-serif; line-height: 1.6; }
+        .header-container { display: flex; flex-shrink: 0; align-items: center; padding: 10px; margin-bottom: 1em; }
+        .logo { height: 40px; width: auto; margin-right: 15px; }
+        .header-container h1 { margin: 0; }
+        #sendButton { background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        #sendButton:hover:not(:disabled) { background-color: #218838; }
+        #sendButton:disabled { background-color: #a3d9b1; color: #f0f0f0; cursor: not-allowed; }
+        #messages { flex-grow: 1; flex-shrink: 1; overflow-y: auto; border: 1px solid #ccc; padding: 10px; background-color: #fff; display: flex; flex-direction: column; gap: 10px; }
+        .message-wrapper { display: flex; align-items: flex-start; gap: 8px; }
+        .message-wrapper.user { width: 100%; flex-direction: row-reverse; }
+        .message-wrapper.server, .message-wrapper.thinking { align-self: flex-start; flex-direction: row; max-width: 85%; width: fit-content; }
 
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-        }
-
-        /* Style for the header container (logo + title) */
-        .header-container {
-            display: flex;
+        /* ===== MODIFIED: Style for the Icons wrapper ===== */
+        .message-icon {
             flex-shrink: 0;
-            align-items: center;
-            padding: 10px;
-            margin-bottom: 1em;
-        }
-
-        /* Style for the logo image */
-        .logo {
-            height: 40px;
-            width: auto;
-            margin-right: 15px;
-        }
-
-        /* Style for the main heading */
-        .header-container h1 {
-            margin: 0;
-        }
-
-        #sendButton {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        #sendButton:hover:not(:disabled) {
-            background-color: #218838;
-        }
-
-        #sendButton:disabled {
-            background-color: #a3d9b1;
-            color: #f0f0f0;
-            cursor: not-allowed;
-        }
-
-        #messages {
-            /* Make messages take up all available space */
-            flex-grow: 1;
-            flex-shrink: 1;
-            /* height: 800px; */
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            padding: 10px;
-            background-color: #fff;
-            /* Add some spacing between messages */
             display: flex;
-            flex-direction: column;
-            gap: 0.5em;
+            align-items: center; /* Vertically center content (image or text) */
         }
 
-        /* Remove default margins from paragraphs inside messages */
-        #messages p {
-            margin: 0;
-            /* Resetting margins */
+        /* ===== NEW: Style for the robot icon image ===== */
+        .message-icon.robot-icon img {
+             width: 30px;  /* Make the image small */
+             height: 30px; /* Make the image small */
+             display: block; /* Prevents extra space below image */
         }
 
-        /* Style for user messages */
-        #messages p.user-message {
-            color: #0056b3;
-            background-color: #e7f3ff;
-            padding: 8px 8px 8px 12px;
-            border-radius: 5px;
-            position: relative;
-            align-self: flex-end;
-            /* Align user messages to the right */
-            max-width: 80%;
-            /* Optional: limit width */
-            word-wrap: break-word;
-            /* Ensure long words break */
+        /* Keep user icon style (it's text) */
+        .message-icon.user-icon {
+             font-size: 1.2em; /* Keep user icon size */
+             padding-top: 2px; /* Keep user icon alignment */
         }
 
-        /* Add human icon and [User] prefix */
-        #messages p.user-message::before {
-            content: '👤: ';
-            /* Added space */
-            font-weight: bold;
-            margin-right: 5px;
-            /* Reduced margin */
-        }
-
-        /* Base style for server messages container (agent responses AND system status) */
-        #messages p.server-message-block {
-            color: #020202;
-            padding: 8px 8px 8px 12px;
-            background-color: rgb(245, 249, 244);
-            border: 1px solid #fff;
-            border-radius: 5px;
-            position: relative;
-            align-self: flex-start;
-            /* Align server messages to the left */
-            max-width: 80%;
-            /* Optional: limit width */
-            word-wrap: break-word;
-            /* Ensure long words break */
-        }
-
-        /* Add robot icon ONLY to server messages that are NOT system status messages */
-        #messages p.server-message-block:not(.system-status-message):not(#thinking-indicator)::before { /* MODIFIED: Exclude thinking indicator */
-            content: '🤖: ';
-            /* Robot emoji */
-            font-weight: bold;
-            margin-right: 8px;
-            /* Space between icon and message content */
-            display: inline-block;
-            /* Helps with alignment */
-            vertical-align: top;
-            /* Align icon with the top of the text block */
-            float: left;
-            /* Float icon left */
-        }
-
-        /* Adjust content padding for server messages with icon */
-        #messages p.server-message-block:not(.system-status-message):not(#thinking-indicator) { /* MODIFIED: Exclude thinking indicator */
-            padding-left: 30px;
-            /* Make space for the floated icon */
-        }
-
-
-        /* Specific styles for system status messages (they still use server-message-block for base style) */
-        #messages p.system-status-message {
-            /* Center align system messages and use full width */
-            align-self: center;
-            max-width: 100%;
-            text-align: center;
-            font-style: italic;
-            color: #555;
-            background-color: #fff;
-            /* Slightly different background */
-            border: none;
-            padding-left: 12px;
-            /* Reset padding */
-        }
-
-
-        /* Keep specific color styles using spans inside the p tags */
-        .connection-open-text {
-            color: green; 
-        }
-
-        .connection-closed-text {
-            color: orange;
-        }
-
-        .error-text {
-            color: red;
-        }
-
-
-        /* Basic Markdown styling */
-        #messages code {
-            background-color: #eee;
-            padding: 2px 4px;
-            border-radius: 3px;
-            font-family: monospace;
-            word-wrap: break-word;
-        }
-
-        #messages pre {
-            background-color: #eee;
-            padding: 10px;
-            border-radius: 3px;
-            overflow-x: auto;
-            max-width: 100%;
-            /* Ensure pre doesn't overflow container */
-        }
-
-        #messages blockquote {
-            border-left: 3px solid #ccc;
-            padding-left: 10px;
-            margin-left: 0;
-            color: #555;
-        }
-
-        #messages ul,
-        #messages ol {
-            margin-left: 20px;
-            /* Keep indentation */
-            padding-left: 0;
-            /* Fix potential layout issues with floated icon */
-            overflow: hidden;
-        }
-
-        /* Ensure Markdown elements inside server messages don't disrupt the icon float */
-        #messages .server-message-block>*:first-child {
-            /* No longer needed with float */
-        }
-
-        #messages .server-message-block>pre:first-child,
-        #messages .server-message-block>ul:first-child,
-        #messages .server-message-block>ol:first-child,
-        #messages .server-message-block>blockquote:first-child {
-            /* No longer needed */
-        }
-
-        /* --- NEW: Styles for Thinking Indicator --- */
-        #thinking-indicator {
-            /* Inherits server-message-block styles */
-             font-style: italic;
-             color: #666;
-        }
-
-        #thinking-indicator .dots span {
-            display: inline-block;
-            opacity: 0;
-            animation: blink 1.4s infinite;
-        }
-
-        #thinking-indicator .dots span:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        #thinking-indicator .dots span:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes blink {
-            0% { opacity: 0; }
-            50% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-        /* --- END NEW --- */
-
-        #messageForm {
-            /* Ensure form stays at the bottom */
-            flex-shrink: 0;
-            padding: 10px;
-            margin-top: 1em;
-        }
-
+        .message-bubble { padding: 8px 12px; border-radius: 10px; word-wrap: break-word; margin: 0; }
+        .message-bubble.user-message { background-color: #e7f3ff; color: #0056b3; margin-left: auto; max-width: 85%; }
+        .message-bubble.server-message-block { background-color: #f0f0f0; color: #333; }
+        .message-bubble.thinking-bubble { background-color: #f0f0f0; color: #666; font-style: italic; padding: 8px 12px; }
+        .thinking-bubble .dots span { display: inline-block; opacity: 0; animation: blink 1.4s infinite; }
+        .thinking-bubble .dots span:nth-child(2) { animation-delay: 0.2s; }
+        .thinking-bubble .dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes blink { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
+        #messages > .system-status-message { align-self: center; max-width: 100%; text-align: center; font-style: italic; color: #555; background-color: transparent; border: none; padding: 5px 12px; margin: 0; }
+        .connection-open-text { color: green; }
+        .connection-closed-text { color: orange; }
+        .error-text { color: red; }
+        .message-bubble code { background-color: #ddd; padding: 2px 4px; border-radius: 3px; font-family: monospace; word-wrap: break-word; }
+        .message-bubble pre { background-color: #ddd; padding: 10px; border-radius: 3px; overflow-x: auto; max-width: 100%; }
+        .message-bubble blockquote { border-left: 3px solid #ccc; padding-left: 10px; margin-left: 0; color: #555; }
+        .message-bubble ul, .message-bubble ol { margin-left: 20px; padding-left: 0; overflow: hidden; }
+        #messageForm { flex-shrink: 0; padding: 10px; margin-top: 1em; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
@@ -263,10 +64,8 @@
             title="Agent Development Kit" />
         <h1>ADK Agent Integrated with MCP</h1>
     </div>
-
     <div id="messages"></div>
     <br />
-
     <form id="messageForm">
         <label for="message">Message:</label>
         <input type="text" id="message" name="message" style="width: 80%" />
@@ -275,46 +74,37 @@
 </body>
 
 <script>
-    // Wrap everything in DOMContentLoaded to ensure elements exist
     document.addEventListener('DOMContentLoaded', (event) => {
         console.log("DOM fully loaded and parsed");
 
-        // --- DOM Elements ---
         const messageForm = document.getElementById("messageForm");
         const messageInput = document.getElementById("message");
         const messagesDiv = document.getElementById("messages");
         const sendButton = document.getElementById("sendButton");
 
-        // --- Check if elements were found ---
         if (!messageForm || !messageInput || !messagesDiv || !sendButton) {
-            console.error("CRITICAL: One or more required DOM elements not found! Check IDs.");
+            console.error("CRITICAL: One or more required DOM elements not found!");
             alert("Initialization Error: UI elements missing. App cannot start.");
-            // Add visual error in the message area if possible
             if (messagesDiv) {
-                messagesDiv.innerHTML = "<p class='server-message-block system-status-message'><span class='error-text'>Initialization Error: UI elements missing.</span></p>";
+                messagesDiv.innerHTML = "<p class='system-status-message'><span class='error-text'>Initialization Error: UI elements missing.</span></p>";
             }
-            return; // Stop script execution
+            return;
         }
         console.log("UI Elements successfully located.");
 
-        // --- WebSocket Connection Setup ---
         const sessionId = Math.random().toString().substring(10);
         const ws_url = "ws://" + window.location.host + "/ws/" + sessionId;
-        let ws = null; // Initialize ws to null
+        let ws = null;
         let reconnectAttempts = 0;
-        const maxReconnectAttempts = 5; // Limit reconnect attempts
+        const maxReconnectAttempts = 5;
 
-        // --- Add Status Message Helper ---
-        function addStatusMessage(text, typeClass) {
-            if (!messagesDiv) {
-                console.error("Cannot add status message, messagesDiv not found");
-                return;
-            }
+        function addStatusMessage(text, typeClass) { // Unchanged
+            if (!messagesDiv) return;
             try {
                 const p = document.createElement("p");
-                p.classList.add("server-message-block", "system-status-message");
+                p.classList.add("system-status-message");
                 const span = document.createElement('span');
-                span.className = typeClass; // e.g., 'error-text', 'connection-open-text'
+                span.className = typeClass;
                 span.textContent = text;
                 p.appendChild(span);
                 messagesDiv.appendChild(p);
@@ -324,213 +114,191 @@
             }
         }
 
-        // --- NEW: Helper function to show/hide thinking indicator ---
+        // ===== MODIFIED: Uses image for robot icon =====
         function showThinkingIndicator() {
-            // Remove existing indicator if any (shouldn't happen often)
             hideThinkingIndicator();
-
             if (!messagesDiv) return;
-            const p = document.createElement("p");
-            p.id = "thinking-indicator";
-            p.classList.add("server-message-block"); // Use base style
-            // Add content with spans for animation
-            p.innerHTML = 'Thinking<span class="dots"><span>.</span><span>.</span><span>.</span></span>';
-            messagesDiv.appendChild(p);
+            const wrapper = document.createElement("div");
+            wrapper.id = "thinking-indicator-wrapper";
+            wrapper.classList.add("message-wrapper", "thinking");
+
+            const iconSpan = document.createElement('span');
+            iconSpan.classList.add('message-icon', 'robot-icon');
+            // Create image element for robot icon
+            const robotImg = document.createElement('img');
+            robotImg.src = 'https://google.github.io/adk-docs/assets/agent-development-kit.png';
+            robotImg.alt = 'Robot icon';
+            iconSpan.appendChild(robotImg); // Add image to the span
+
+            const bubbleP = document.createElement("p");
+            bubbleP.classList.add("message-bubble", "thinking-bubble");
+            bubbleP.innerHTML = 'Thinking<span class="dots"><span>.</span><span>.</span><span>.</span></span>';
+
+            wrapper.appendChild(iconSpan);
+            wrapper.appendChild(bubbleP);
+            messagesDiv.appendChild(wrapper);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
             console.log("Showing thinking indicator.");
         }
 
-        function hideThinkingIndicator() {
-            const indicator = document.getElementById('thinking-indicator');
-            if (indicator) {
-                indicator.remove();
+        function hideThinkingIndicator() { // Unchanged
+            const indicatorWrapper = document.getElementById('thinking-indicator-wrapper');
+            if (indicatorWrapper) {
+                indicatorWrapper.remove();
                 console.log("Hiding thinking indicator.");
             }
         }
-        // --- END NEW ---
 
-
-        // --- WebSocket Handlers ---
-        function addWebSocketHandlers(webSocketInstance) {
-            // Clear previous handlers to prevent duplicates on reconnect
-            webSocketInstance.onopen = null;
+        function addWebSocketHandlers(webSocketInstance) { // Function definition unchanged
+            webSocketInstance.onopen = null; // Unchanged
             webSocketInstance.onmessage = null;
-            webSocketInstance.onclose = null;
-            webSocketInstance.onerror = null;
-            console.log("Cleared previous WebSocket handlers.");
+            webSocketInstance.onclose = null; // Unchanged
+            webSocketInstance.onerror = null; // Unchanged
+            console.log("Cleared previous WebSocket handlers."); // Unchanged
 
-            webSocketInstance.onopen = function () {
+            webSocketInstance.onopen = function () { /* Unchanged */
                 console.log("WebSocket connection opened successfully.");
-                reconnectAttempts = 0; // Reset reconnect attempts on successful open
+                reconnectAttempts = 0;
                 try {
-                    if (sendButton) {
-                        sendButton.disabled = false;
-                        console.log("Send button ENABLED.");
-                    } else {
-                        console.error("Send button element not found in onopen!");
-                    }
+                    if (sendButton) sendButton.disabled = false;
                     addStatusMessage("Connection opened", "connection-open-text");
-                    // Attach the submit handler *only* when connection is open
-                    addSubmitHandler(this);
+                    addSubmitHandler();
                     console.log("Submit handler attached.");
                 } catch (error) {
-                    console.error("Error during WebSocket onopen execution:", error);
+                    console.error("Error during WebSocket onopen:", error);
                     addStatusMessage(`Error during connection setup: ${error.message}`, "error-text");
-                    if (sendButton) sendButton.disabled = true; // Ensure button is disabled if error occurs
+                    if (sendButton) sendButton.disabled = true;
                 }
             };
 
+            // ===== MODIFIED: Uses image for robot icon =====
             webSocketInstance.onmessage = function (event) {
                 try {
                     const packet = JSON.parse(event.data);
-
                     if (packet.turn_complete && packet.turn_complete === true) {
                         console.log("Turn complete signal received.");
-                         // Optional: Hide thinking indicator even on turn complete if no message follows?
-                         // hideThinkingIndicator(); // Uncomment if needed
                         return;
                     }
-
                     if (packet.message) {
-                        // --- MODIFIED: Hide indicator before adding message ---
                         hideThinkingIndicator();
-                        // --- END MODIFIED ---
+                        if (!messagesDiv) { console.error("Messages container not found in onmessage!"); return; }
 
-                        const messageElement = document.createElement("p");
-                        messageElement.classList.add("server-message-block");
+                        const wrapper = document.createElement("div");
+                        wrapper.classList.add("message-wrapper", "server");
 
+                        const iconSpan = document.createElement('span');
+                        iconSpan.classList.add('message-icon', 'robot-icon');
+                        // Create image element for robot icon
+                        const robotImg = document.createElement('img');
+                        robotImg.src = 'https://google.github.io/adk-docs/assets/agent-development-kit.png';
+                        robotImg.alt = 'Robot icon';
+                        iconSpan.appendChild(robotImg); // Add image to the span
+
+                        const bubbleP = document.createElement("p");
+                        bubbleP.classList.add("message-bubble", "server-message-block");
                         try {
                             const htmlContent = marked.parse(packet.message);
-                            messageElement.innerHTML = htmlContent;
+                            bubbleP.innerHTML = htmlContent;
                         } catch (e) {
                             console.error("Error parsing Markdown:", e);
-                            const textNode = document.createTextNode(packet.message);
-                            messageElement.appendChild(textNode);
+                            bubbleP.textContent = packet.message;
                             addStatusMessage(`Markdown parsing error: ${e.message}`, "error-text");
                         }
 
-                        if (messagesDiv) {
-                            messagesDiv.appendChild(messageElement);
-                            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                        } else {
-                            console.error("Messages container not found in onmessage!");
-                        }
-
-                    } else {
-                        console.log("Received packet without 'message' field:", packet);
-                        // Do NOT hide the thinking indicator here, as this is not a displayable message
-                    }
+                        wrapper.appendChild(iconSpan); // Append span containing the img
+                        wrapper.appendChild(bubbleP);
+                        messagesDiv.appendChild(wrapper);
+                        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                    } else { console.log("Received packet without 'message' field:", packet); }
                 } catch (parseError) {
-                    console.error("Error parsing incoming WebSocket message:", parseError, "Raw data:", event.data);
+                    console.error("Error parsing WebSocket message:", parseError, "Raw data:", event.data);
                     addStatusMessage(`Error processing server message: ${parseError.message}`, "error-text");
-                    // Optional: Hide indicator on error?
-                    // hideThinkingIndicator(); // Uncomment if needed
+                    hideThinkingIndicator();
                 }
             };
 
-            webSocketInstance.onclose = function (event) {
+            webSocketInstance.onclose = function (event) { /* Unchanged */
                 console.warn(`WebSocket connection closed. Code: ${event.code}, Reason: '${event.reason || 'No reason given'}', Was Clean: ${event.wasClean}`);
-                 // --- MODIFIED: Hide indicator on close ---
                  hideThinkingIndicator();
-                 // --- END MODIFIED ---
-                if (sendButton) {
-                    sendButton.disabled = true;
-                    console.log("Send button DISABLED due to close.");
-                }
-                // Remove submit handler when connection is closed
+                if (sendButton) sendButton.disabled = true;
                 if (messageForm) messageForm.onsubmit = null;
-
                 if (reconnectAttempts < maxReconnectAttempts) {
                     reconnectAttempts++;
-                    const reconnectDelay = 5000 * reconnectAttempts; // Exponential backoff (simple version)
+                    const reconnectDelay = 5000 * reconnectAttempts;
                     addStatusMessage(`Connection closed. Attempting reconnect ${reconnectAttempts}/${maxReconnectAttempts} in ${reconnectDelay / 1000}s...`, "connection-closed-text");
-                    setTimeout(connectWebSocket, reconnectDelay); // Use the dedicated connect function
+                    setTimeout(connectWebSocket, reconnectDelay);
                 } else {
-                    console.error("Max reconnection attempts reached. Giving up.");
-                    addStatusMessage("Connection lost. Max reconnection attempts reached. Please reload the page.", "error-text");
+                    console.error("Max reconnection attempts reached.");
+                    addStatusMessage("Connection lost. Max reconnection attempts reached. Please reload.", "error-text");
                 }
             };
 
-            webSocketInstance.onerror = function (error) {
+            webSocketInstance.onerror = function (error) { /* Unchanged */
                 console.error("WebSocket error occurred:", error);
-                // --- MODIFIED: Hide indicator on error ---
                 hideThinkingIndicator();
-                // --- END MODIFIED ---
                 addStatusMessage("WebSocket error occurred. Check console.", "error-text");
-                // Do not disable button here, onclose will handle it.
             };
 
-            console.log("WebSocket event handlers attached for:", webSocketInstance.url);
+            console.log("WebSocket event handlers attached for:", webSocketInstance.url); // Unchanged
         }
 
-        // --- Form Submit Handler ---
-        // Defined outside addWebSocketHandlers so it's created only once
-        function submitMessageHandler(e) {
-            e.preventDefault(); // Always prevent default
-
+        function submitMessageHandler(e) { /* Unchanged - still uses text user icon */
+            e.preventDefault();
             if (!ws || ws.readyState !== WebSocket.OPEN) {
-                console.warn("Attempted to send message, but WebSocket is not open. State:", ws ? ws.readyState : 'null');
+                console.warn("Attempted send, but WebSocket is not open.");
                 addStatusMessage("Cannot send message - Connection is not active.", "error-text");
                 return false;
             }
-
             const messageText = messageInput.value.trim();
             if (messageText && messagesDiv && messageInput) {
-                // Add user message first
-                const p = document.createElement("p");
-                p.textContent = messageText; // Use textContent for safety
-                p.classList.add("user-message");
-                messagesDiv.appendChild(p);
-                messagesDiv.scrollTop = messagesDiv.scrollHeight; // Scroll after adding user message
-
-                 // --- MODIFIED: Show thinking indicator ---
-                 showThinkingIndicator();
-                 // --- END MODIFIED ---
-
+                const wrapper = document.createElement("div");
+                wrapper.classList.add("message-wrapper", "user");
+                const bubbleP = document.createElement("p");
+                bubbleP.classList.add("message-bubble", "user-message");
+                bubbleP.textContent = messageText;
+                const iconSpan = document.createElement('span');
+                iconSpan.classList.add('message-icon', 'user-icon');
+                iconSpan.textContent = '👤'; // Keep user icon as text
+                wrapper.appendChild(iconSpan); // Icon first in DOM for row-reverse
+                wrapper.appendChild(bubbleP); // Bubble second in DOM for row-reverse
+                messagesDiv.appendChild(wrapper);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                showThinkingIndicator();
                 try {
                     console.log("Sending message:", messageText);
                     ws.send(messageText);
                 } catch (error) {
                     console.error("Error sending message via WebSocket:", error);
-                     // --- MODIFIED: Hide indicator if send fails ---
-                     hideThinkingIndicator();
-                     // --- END MODIFIED ---
+                    hideThinkingIndicator();
                     addStatusMessage(`Failed to send message: ${error.message}`, "error-text");
-                    // Optionally add visual indication to the user message itself
                     const errorSpan = document.createElement('span');
                     errorSpan.textContent = " (Send Error)";
                     errorSpan.style.color = "red";
-                    errorSpan.style.fontWeight = "normal";
-                    p.appendChild(errorSpan);
+                    errorSpan.style.fontSize = "0.8em";
+                    bubbleP.appendChild(errorSpan);
                 }
-                messageInput.value = ""; // Clear input field
-            } else if (!messageText) {
-                console.log("Empty message submission ignored.");
-            }
-            return false; // Prevent default form submission behavior
+                messageInput.value = "";
+            } else if (!messageText) { console.log("Empty message submission ignored."); }
+            return false;
         }
 
-        // Function to attach the single submit handler instance
-        // Now called only from ws.onopen
-        function addSubmitHandler() {
+        function addSubmitHandler() { /* Unchanged */
             if (messageForm) {
                 messageForm.onsubmit = submitMessageHandler;
                 console.log("Submit handler assigned to form.");
             } else {
-                console.error("Message form not found, cannot assign submit handler!");
+                console.error("Message form not found!");
             }
         }
 
-        // --- Initial Connection Function ---
-        function connectWebSocket() {
-            console.log(`Attempting to connect to WebSocket: ${ws_url} (Attempt: ${reconnectAttempts + 1})`);
+        function connectWebSocket() { /* Unchanged */
+            console.log(`Attempting WebSocket connect: ${ws_url} (Attempt: ${reconnectAttempts + 1})`);
             try {
-                ws = new WebSocket(ws_url); // Create the WebSocket instance
-                addWebSocketHandlers(ws);   // Attach handlers to the new instance
+                ws = new WebSocket(ws_url);
+                addWebSocketHandlers(ws);
             } catch (error) {
-                console.error("Error creating WebSocket object:", error);
+                console.error("Error creating WebSocket:", error);
                 addStatusMessage(`Failed to initialize connection: ${error.message}`, "error-text");
-                // Attempt reconnect after delay if creation fails
                 if (reconnectAttempts < maxReconnectAttempts) {
                     reconnectAttempts++;
                     const reconnectDelay = 5000 * reconnectAttempts;
@@ -541,9 +309,8 @@
             }
         }
 
-        // --- Start the application ---
-        console.log("Starting WebSocket application...");
-        connectWebSocket(); // Initial connection attempt
+        console.log("Starting WebSocket application..."); // Unchanged
+        connectWebSocket();
 
     }); // End DOMContentLoaded
 </script>
