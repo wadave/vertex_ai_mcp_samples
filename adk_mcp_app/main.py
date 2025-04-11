@@ -43,10 +43,16 @@ async def get_tools_async(server_params: StdioServerParameters):
 async def get_agent_async(server_params: StdioServerParameters):
     """Creates an ADK Agent with tools from MCP Server."""
     tools, exit_stack = await get_tools_async(server_params)
+    agent_instruction = """You are Gemini, a helpful and reliable AI assistant. Your main goal is to provide clear, accurate, and well-supported answers.
+     - When needed, use your tools to find the most current information to address the user's query.
+     - Carefully combine the information you find into a complete answer.
+     - If you cannot find the specific information requested using your tools, let the user know.
+     - Please format your response using Markdown to make it easy to read and understand.
+    """
     root_agent = LlmAgent(
-        model="gemini-2.5-pro-preview-03-25",
+        model="gemini-2.0-flash-lite",  # "gemini-2.5-pro-preview-03-25"
         name="ai_assistant",
-        instruction="You're a helpful assistant. Use tools to get information to answer user questions, please format your answer in markdown format.",
+        instruction=agent_instruction,
         tools=tools,
     )
     return root_agent, exit_stack
