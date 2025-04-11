@@ -311,3 +311,4 @@ credentials.json
 token.json
 .python-version
 .pre-commit-config.yaml
+.env
