@@ -134,7 +134,7 @@ uvicorn main:app --reload
    ```bash
    export SERVICE_NAME='adk-multiagent-mcp-app' # This is the name of our Application and Cloud Run service. Change it if you'd like.
    export LOCATION='us-central1'             # If you change this, make sure the region is supported.
-   export PROJECT_ID='dw-genai-dev'  # Change this
+   export PROJECT_ID='<your project id>'  # Change this
    ```
 
    In Cloud Shell, execute the following command:
