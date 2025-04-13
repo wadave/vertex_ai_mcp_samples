@@ -23,19 +23,19 @@ It interacts with the following MCP servers:
           - 2. Weather MCP server  (Local code)
           - 3. [Public AirBnB MCP server](https://github.com/openbnb-org/mcp-server-airbnb) (Fetch code via Pypi)
           
-The Cocktail MCP server has 5 tools:  
+- The Cocktail MCP server has 5 tools:  
           - 1. search cocktail by name  
           - 2. list all cocktail by first letter   
           - 3. search ingredient by name.   
           - 4. list random cocktails   
           - 5. lookup full cocktail details by id  
 
-The Weather MCP server has 3 tools:  
+- The Weather MCP server has 3 tools:  
           - 1. get weather forecast by city name
           - 2. get weather forecast by coordinates   
           - 3. get weather alert by state code  
 
-The AirBnB MCP server has 2 tools:  
+- The AirBnB MCP server has 2 tools:  
           - 1. search for Airbnb listings
           - 2. get detailed information about a specific Airbnb listing
 
