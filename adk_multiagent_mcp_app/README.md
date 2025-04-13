@@ -50,7 +50,7 @@ Here are some example questions you can ask the chatbot:
 
 ## Instructions
 ## 1. Test it locally
-** Make sure you have Node.js installed to run the AirBnB MCP server locally**
+**NOTE: *Make sure you have Node.js installed to run the AirBnB MCP server locally***
 
 
 ### Create & Activate Virtual Environment (Recommended):
