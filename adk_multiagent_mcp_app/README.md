@@ -19,8 +19,8 @@ It has three agents: root agent, cocktail agent, and booking agent.
 
   
 It interacts with the following MCP servers:  
-          - 1. Cocktail MCP server (Local code)
-          - 2. Weather MCP server  (Local code)
+          - 1. Cocktail MCP server (Local code)  
+          - 2. Weather MCP server  (Local code)  
           - 3. [Public AirBnB MCP server](https://github.com/openbnb-org/mcp-server-airbnb) (Fetch code via Pypi)
           
 - The Cocktail MCP server has 5 tools:  
