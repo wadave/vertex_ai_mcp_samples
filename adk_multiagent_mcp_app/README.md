@@ -12,7 +12,7 @@ Architecture:
 
 Screenshot:
 
-<img src="adk_multi_agent.png" alt="Descriptive alt text" width="700" />
+<img src="static/app_screenshot.png" alt="Descriptive alt text" width="700" />
 
 
 It has three agents: root agent, cocktail agent, and booking agent. 
@@ -56,14 +56,14 @@ Here are some example questions you can ask the chatbot:
 ### Create & Activate Virtual Environment (Recommended):
 
 ```
-python -m venv .venv
+python -m venv .venv  # or uv venv .venv --python 3.12
 source .venv/bin/activate
 ```
 
-### Install ADK and dependencies:
+### Install the ADK library and dependencies:
 
 ```
-pip install google-adk fastapi uvicorn geopy
+[uv] pip install google-adk fastapi uvicorn geopy
 
 ```
 
@@ -72,14 +72,17 @@ Project Structure
 ```
 your_project_folder/  # Project folder
 |── adk_multiagent_mcp_app
-   ├── adk_app.png
+   ├── Dockerfile  # Needed for remote container deployment
    ├── main.py
+   ├── .env  # Follow the below instruction to create it
    ├── mcp_server
    │   ├── cocktail.py
    │   └── weather_server.py
    ├── README.md
+   ├── requirements.txt  # Needed for Docker container creation
    └── static
        ├── adk_multiagent.png
+       ├── app_screenshot.png
        ├── index.html
        ├── robot1.png
        └── user_guide.md
