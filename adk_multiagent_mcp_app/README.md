@@ -1,10 +1,7 @@
 ## An ADK Agent integrated with MCP Client
 
-This web application was developed using Google's ADK (Agent Development Kit) and MCP (Model Context Protocol). Specifically, the Agent relies on the Google ADK.
+This web application was developed using Google's ADK (Agent Development Kit) and MCP (Model Context Protocol). Specifically, the Agent relies on the Google ADK to interact with the MCP server.
 
-
-
-   
 This chatbot demonstrates the use of the ADK Multi-Agent integrated with MCP Clients
 
 Architecture:
@@ -48,10 +45,14 @@ Here are some example questions you can ask the chatbot:
 - 'Please list a random cocktail'
 - 'Please get weather forecast for New York'
 - 'Please get weather forecast for 40.7128,-74.0060'
-- 'I would like to book an airbnb condo in LA, CA for 2 nights. 04/28 - 04/30, 2025, two adults, no kid'  
+- 'I would like to know information about an airbnb condo in LA, CA for 2 nights. 04/28 - 04/30, 2025, two adults, no kid'  
 
 
 ## Instructions
+## 1. Test it locally
+** Make sure you have Node.js installed to run the AirBnB MCP server locally**
+
+
 ### Create & Activate Virtual Environment (Recommended):
 
 ```
@@ -59,10 +60,11 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-### Install ADK:
+### Install ADK and dependencies:
 
 ```
-pip install -r requirements.txt
+pip install google-adk fastapi uvicorn geopy
+
 ```
 
 Project Structure
@@ -124,7 +126,7 @@ GOOGLE_CLOUD_LOCATION="us-central1"
 uvicorn main:app --reload
 ```
 
-### Build and Deploy the Application to Cloud Run
+## 2. Build and Deploy the Application to Cloud Run
 
 
 - Build and deploy the service to Cloud Run:
