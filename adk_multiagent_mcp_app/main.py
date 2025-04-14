@@ -227,7 +227,7 @@ async def websocket_endpoint(
     """Client websocket endpoint"""
     try:
         await websocket.accept()
-        # logging.info(f"Client #{session_id} connected")  
+        # logging.info(f"Client #{session_id} connected")
 
         # Start agent session
         session_service.create_session(
