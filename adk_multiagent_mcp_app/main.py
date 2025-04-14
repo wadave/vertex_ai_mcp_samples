@@ -139,14 +139,14 @@ async def run_multi_agent(
         booking_agent = LlmAgent(
             model=MODEL_ID,
             name="booking_assistant",
-            instruction="Use tools to handle inquiries related to booking accommodations (rooms, condos, houses, apartments, town-houses) and checking weather information",
+            instruction="Use booking_tools to handle inquiries related to booking accommodations (rooms, condos, houses, apartments, town-houses), and checking weather information. Format your response using Markdown",
             tools=booking_tools,
         )
 
         cocktail_agent = LlmAgent(
             model=MODEL_ID,
             name="cocktail_assistant",
-            instruction="Use tools to handle all inquiries related to cocktails, drink recipes, ingredients, and mixology.",
+            instruction="Use ct_tools to handle all inquiries related to cocktails, drink recipes, ingredients, and mixology. Format your response using Markdown",
             tools=ct_tools,
         )
 
