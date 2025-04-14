@@ -1,9 +1,10 @@
 ## An ADK Agent integrated with MCP Client
+
 This web application was developed using Google's ADK (Agent Development Kit) and MCP (Model Context Protocol). Specifically, the Agent relies on the Google ADK. A local MCP server instance, established using custom server code designed for cocktail data management, facilitates data retrieval. The web application acts as an MCP client to fetch cocktail information via this local server.
 
-Screenshot:  
+Screenshot:
 
-<img src="../asset/adk_app.png" alt="Descriptive alt text" width="700" /> 
+<img src="../asset/adk_app.png" alt="Descriptive alt text" width="700" />
 
 ### Create & Activate Virtual Environment (Recommended):
 
@@ -11,13 +12,14 @@ Screenshot:
 python -m venv .venv
 source .venv/bin/activate
 ```
+
 ### Install ADK:
 
 ```
 pip install google-adk fastapi
 ```
 
-The project folder structure:
+Project Structure
 
 ```
 your_project_folder/  # Project folder
@@ -30,11 +32,15 @@ your_project_folder/  # Project folder
     └── static
         └── index.html
 ```
+
 ### Run the app
+
 Start the Fast API: Run the following command within the `adk_mcp_app` folder
+
 1. Set up values in `.env ` file
 
 Create a .env file with the following contents:
+
 ```
 # Choose Model Backend: 0 -> ML Dev, 1 -> Vertex
 GOOGLE_GENAI_USE_VERTEXAI=1
@@ -48,12 +54,14 @@ GOOGLE_CLOUD_LOCATION="us-central1"
 ```
 
 If using Google API key:
+
 ```
 GOOGLE_GENAI_USE_VERTEXAI=0
 GOOGLE_API_KEY=YOUR_VALUE_HERE
 ```
 
 If using Vertex AI Project ID:
+
 ```
 GOOGLE_GENAI_USE_VERTEXAI=1
 GOOGLE_CLOUD_PROJECT=YOUR_VALUE_HERE

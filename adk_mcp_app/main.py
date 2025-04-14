@@ -8,7 +8,6 @@ from google.adk.runners import Runner
 from fastapi import FastAPI, WebSocket
 from starlette.websockets import WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 from google.adk.tools.mcp_tool.mcp_toolset import (
     MCPToolset,
     StdioServerParameters,
@@ -50,7 +49,7 @@ async def get_agent_async(server_params: StdioServerParameters):
      - Please format your response using Markdown to make it easy to read and understand.
     """
     root_agent = LlmAgent(
-        model="gemini-2.0-flash",  # "gemini-2.5-pro-preview-03-25"
+        model="gemini-2.0-flash-lite",  # "gemini-2.5-pro-preview-03-25"
         name="ai_assistant",
         instruction=agent_instruction,
         tools=tools,
@@ -117,35 +116,35 @@ async def run_adk_agent_async(
 
 app = FastAPI()
 
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
-
-
-@app.get("/")
-async def root():
-    """Serves the index.html"""
-    return FileResponse(os.path.join(STATIC_DIR, "index.html"))
+STATIC_DIR = "static"  # Or your directory name
 
 
 @app.websocket("/ws/{session_id}")
-async def websocket_endpoint(websocket: WebSocket, session_id: int):
+async def websocket_endpoint(
+    websocket: WebSocket, session_id: str
+):  # Use str for session_id
     """Client websocket endpoint"""
+    try:
+        await websocket.accept()
+        print(f"Client #{session_id} connected")  # Your original print
 
-    # Wait for client connection
-    await websocket.accept()
-    print(f"Client #{session_id} connected")
+        # Start agent session
+        session_service.create_session(
+            app_name=APP_NAME, user_id=session_id, session_id=session_id, state={}
+        )
+        # Start agent communication task
+        agent_task = asyncio.create_task(
+            run_adk_agent_async(websocket, ct_server_params, session_id)
+        )
+        # Keep the endpoint alive while the agent task runs.
+        await agent_task
 
-    # Start agent session
-    session_id = str(session_id)
-    session_service.create_session(
-        app_name=APP_NAME, user_id=session_id, session_id=session_id, state={}
-    )
+    except Exception as e:
+        # Catch any other unexpected error
+        print(
+            f"!!! EXCEPTION in websocket_endpoint for session {session_id}: {e}",
+            exc_info=True,
+        )
 
-    # Start tasks
-    agent_task = asyncio.create_task(
-        run_adk_agent_async(websocket, ct_server_params, session_id)
-    )
 
-    await asyncio.gather(agent_task)
-
-    # Disconnected
-    print(f"Client #{session_id} disconnected")
+app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
