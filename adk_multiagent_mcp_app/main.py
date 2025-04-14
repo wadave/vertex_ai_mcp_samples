@@ -56,30 +56,20 @@ server_config_dict = {
 MODEL_ID = "gemini-2.0-flash"
 
 ROOT_AGENT_INSTRUCTION = """
-**Role:** You are a central orchestrator agent. Your primary function is to analyze user requests and delegate them to the appropriate specialist sub-agent. You should only respond directly if the request is outside the scope of your sub-agents or is a simple conversational interaction (like greetings).
+**Role:** You are a Virtual Assistant acting as a Request Router. You can help user with questions regarding cocktails, weather, and booking accommodations.
 
-**Capabilities:** You can help users with the questions regarding cocktail, weather, booking accommodations.
+**Primary Goal:** Analyze user requests and route them to the correct specialist sub-agent.
 
-**Available Sub-Agents:**
-* `cocktail_assistant`: Handles all inquiries related to cocktails, drink recipes, ingredients, and mixology.
-* `booking_assistant`: Handles inquiries related to booking accommodations (rooms, condos, houses, apartments, town-houses) and checking weather information, particularly as it pertains to travel or booking contexts.
+**Capabilities & Routing:**
+* **Greetings:** If the user greets you, respond warmly and directly.
+* **Cocktails:** Route requests about cocktails, drinks, recipes, or ingredients to `cocktail_assistant`.
+* **Booking & Weather:** Route requests about booking accommodations (any type) or checking weather to `booking_assistant`.
+* **Out-of-Scope:** If the request is unrelated (e.g., general knowledge, math), state directly that you cannot assist with that topic.
 
-**Workflow:**
-1.  **Analyze Request:** Carefully examine the user's request to determine the core intent and subject matter.
-2.  **Identify Specialist:**
-    * If the request is primarily about **cocktails**, delegate to `cocktail_assistant`.
-    * If the request is primarily about **booking accommodations** or **weather**, delegate to `booking_assistant`.
-3.  **Delegate:** If you identify sub-agent, don't need to apology. Please route the *entire* user request to the identified sub-agent.
-4.  **Handle Ambiguity/Other:**
-    * If the request doesn't clearly fit either sub-agent's specialty (e.g., asking about history, math, or general knowledge), state that you cannot handle that type of request with your current specialists.
-    * If the request is conversational (e.g., "hello", "thank you"), respond politely, appropriately and enthusiastically yourself.
-    * If a request seems to overlap domains, use your best judgment to delegate to the *primary* domain, or consider asking the user for clarification if necessary.
-5.  **Present Results:** Once a sub-agent provides a response, present that information clearly to the user.
-6.  **Handle Failures:** If a sub-agent fails or cannot find the requested information, relay this fact to the user.
-7.  **Formatting:** Format your final response to the user using Markdown for readability.
-
-**Constraint:** Do *not* attempt to fulfill cocktail or booking/weather requests yourself; always delegate to the appropriate sub-agent.
-
+**Key Directives:**
+* **Delegate Immediately:** Once a suitable sub-agent is identified, route the request without asking permission.
+* **Do Not Answer Delegated Topics:** You must **not** attempt to answer questions related to cocktails, booking, or weather yourself. Always delegate.
+* **Formatting:** Format your final response to the user using Markdown for readability.
 """
 
 
@@ -87,13 +77,13 @@ async def run_multi_agent(
     server_config_dict: AllServerConfigs, session_id: str, query: str
 ):
 
-    print("[user]: ", query)
+    logging.info("[user]: ", query)
     content = types.Content(role="user", parts=[types.Part(text=query)])
 
     all_tools = {}
     # Use a single ExitStack in the main task
     async with contextlib.AsyncExitStack() as stack:  # Master stack
-        print("Setting up MCP connections sequentially...")
+        # logging.info("Setting up MCP connections sequentially...")
         for key, value in server_config_dict.items():
             server_params = value
             individual_exit_stack = (
@@ -101,47 +91,46 @@ async def run_multi_agent(
             )
             try:
                 # 1. AWAIT the call to run the function and get its results
-                print(f"  Attempting connection for {server_params}...")
+                # logging.info(f"  Attempting connection for {server_params}...")
                 tools, individual_exit_stack = await MCPToolset.from_server(
                     connection_params=server_params
                 )
 
                 # 2. Check if an exit stack was actually returned
                 if individual_exit_stack is None:
-                    print(
+                    logging.info(
                         f"  Warning: No exit stack returned for {server_params}. Cannot manage cleanup."
                     )
 
                 # 3. Enter the *returned* individual_exit_stack into the master stack
                 #    This makes the master stack responsible for cleaning it up later.
-                print(f"  Registering cleanup stack for {server_params}...")
+                # logging.info(f"  Registering cleanup stack for {server_params}...")
                 await stack.enter_async_context(individual_exit_stack)
 
                 # 4. Add the tools
-                print(f"  Connection established for {server_params}, got tools.")
+                # logging.info(f"  Connection established for {server_params}, got tools.")
                 # Check if tools is None or empty if connection might partially fail
                 if tools:
                     all_tools.update({key: tools})
                 else:
-                    print(
+                    logging.info(
                         f"  Warning: Connection successful but no tools returned for {server_params}."
                     )
 
             except Exception as e:
                 # Catch other errors during the MCPToolset.from_server call itself
-                print(f"Error setting up connection for {server_params}: {e}")
+                logging.error(f"Error setting up connection for {server_params}: {e}")
                 # Optionally re-raise if errors are critical: raise
 
-        print(f"Finished setup. Collected {len(all_tools)} servers.")
+        # logging.info(f"Finished setup. Collected {len(all_tools)} servers.")
 
         # --- Agent Creation and Run (remains the same) ---
         if not all_tools:
-            print(
+            logging.info(
                 "Warning: No tools were collected. Agent may not function as expected."
             )
             # Consider returning early or raising an error if tools are essential
 
-        print(all_tools)
         booking_tools = all_tools["bnb"]
         booking_tools.extend(all_tools["weather"])
 
@@ -150,14 +139,14 @@ async def run_multi_agent(
         booking_agent = LlmAgent(
             model=MODEL_ID,
             name="booking_assistant",
-            instruction="Use tools to get information to answer questions.",
+            instruction="Use tools to handle inquiries related to booking accommodations (rooms, condos, houses, apartments, town-houses) and checking weather information",
             tools=booking_tools,
         )
 
         cocktail_agent = LlmAgent(
             model=MODEL_ID,
             name="cocktail_assistant",
-            instruction="Use tools to get information to answer questions.",
+            instruction="Use tools to handle all inquiries related to cocktails, drink recipes, ingredients, and mixology.",
             tools=ct_tools,
         )
 
@@ -175,7 +164,7 @@ async def run_multi_agent(
             session_service=session_service,
         )
 
-        print("Running agent...")
+        logging.info("Running agent...")
         events_async = runner.run_async(
             session_id=session_id, user_id=session_id, new_message=content
         )
@@ -183,15 +172,15 @@ async def run_multi_agent(
         response = []
         async for event in events_async:
             # Your event processing logic...
-            if event.content.role == "user" and event.content.parts[0].text:
-                print("[user]:", event.content.parts[0].text)
-            if event.content.parts[0].function_response:
-                print("[-tool_response-]", event.content.parts[0].function_response)
+            # if event.content.role == "user" and event.content.parts[0].text:
+            #     logging.info("[user]:", event.content.parts[0].text)
+            # if event.content.parts[0].function_response:
+            #     logging.info("[-tool_response-]", event.content.parts[0].function_response)
             if event.content.role == "model" and event.content.parts[0].text:
-                print("[agent]:", event.content.parts[0].text)
+                logging.info("[agent]:", event.content.parts[0].text)
                 response.append(event.content.parts[0].text)
 
-        print("Agent run finished. Exiting context stack...")
+        # logging.info("Agent run finished. Exiting context stack...")
         # Master stack cleanup happens automatically here
         return response  # Or other appropriate return value
 
@@ -202,7 +191,7 @@ async def run_adk_agent_async(
     """Handles client-to-agent communication over WebSocket."""
     try:
         # Your existing setup for the agent might be here
-        logging.info(f"Agent task started for session {session_id}")
+        # logging.info(f"Agent task started for session {session_id}")
         while True:
             text = await websocket.receive_text()
             response = await run_multi_agent(server_config_dict, session_id, text)
@@ -238,7 +227,7 @@ async def websocket_endpoint(
     """Client websocket endpoint"""
     try:
         await websocket.accept()
-        print(f"Client #{session_id} connected")  # Your original print
+        # logging.info(f"Client #{session_id} connected")  
 
         # Start agent session
         session_service.create_session(
@@ -253,7 +242,7 @@ async def websocket_endpoint(
 
     except Exception as e:
         # Catch any other unexpected error
-        print(
+        logging.error(
             f"!!! EXCEPTION in websocket_endpoint for session {session_id}: {e}",
             exc_info=True,
         )
