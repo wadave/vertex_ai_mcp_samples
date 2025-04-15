@@ -50,84 +50,59 @@ Here are some example questions you can ask the chatbot:
 
 ## Instructions
 ## 1. Test it locally
-**NOTE: *Make sure you have Node.js installed to run the AirBnB MCP server locally***
-
-
-### Create & Activate Virtual Environment (Recommended):
-
-```
-python -m venv .venv  
-source .venv/bin/activate
-```
-
-### Install the ADK library and dependencies:
-
-```
-pip install -r requirements.txt
-
-
-```
+**NOTE:**
+***1. Make sure you have Node.js installed to run the AirBnB MCP server locally***
+***2. Make sure you have [uv](https://docs.astral.sh/uv/getting-started/installation/) package management tool installed locally***
 
 Project Structure
 
 ```
-your_project_folder/  # Project folder
-|── adk_multiagent_mcp_app
-   ├── Dockerfile  # Needed for remote container deployment
+Your_project_folder/  # Project folder
+|── adk_multiagent_mcp_app # App folder
+   ├── Dockerfile
    ├── main.py
-   ├── .env  # Follow the below instruction to create it
+   ├── .dockerignore  # Ignore .venv when building docker image
+   ├── .python-version  # Use Python 3.12
+   ├── .env      # Follow the instruction to create one
    ├── mcp_server
    │   ├── cocktail.py
    │   └── weather_server.py
+   ├── pyproject.toml  # Project dependencies
    ├── README.md
-   ├── requirements.txt  # Needed for Docker container creation
-   └── static
-       ├── adk_multiagent.png
-       ├── app_screenshot.png
-       ├── index.html
-       ├── robot1.png
-       └── user_guide.md
+   ├── static
+   │   ├── adk_multiagent.png
+   │   ├── app_screenshot.png
+   │   ├── index.html
+   │   ├── robot1.png
+   │   └── user_guide.md
+   └── uv.lock
 ```
 
 ### Run the app
 
-Start the Fast API: Run the following command within the `adk_mcp_app` folder
+Start the Fast API: Run the following steps.
 
 1. Set up values in `.env ` file
 
 Create a .env file with the following contents:
 
 ```
-# Choose Model Backend: 0 -> ML Dev, 1 -> Vertex
+# Choose Model Backend: 0 -> ML Dev, 1 -> Vertex AI
 GOOGLE_GENAI_USE_VERTEXAI=1
 
 # ML Dev backend config
 GOOGLE_API_KEY=YOUR_VALUE_HERE
 
-# Vertex backend config
+# Vertex AI backend config
 GOOGLE_CLOUD_PROJECT="<your project id>"
 GOOGLE_CLOUD_LOCATION="us-central1"
 ```
 
-If using Google API key:
-
-```
-GOOGLE_GENAI_USE_VERTEXAI=0
-GOOGLE_API_KEY=YOUR_VALUE_HERE
-```
-
-If using Vertex AI Project ID:
-
-```
-GOOGLE_GENAI_USE_VERTEXAI=1
-GOOGLE_CLOUD_PROJECT=YOUR_VALUE_HERE
-GOOGLE_CLOUD_LOCATION="us-central1"
-```
 
 2.  Run the below command
-
+Under `adk_multiagent_mcp_app` folder:
 ```
-uvicorn main:app --reload
+uv run uvicorn main:app --reload
 ```
 
 ## 2. Build and Deploy the Application to Cloud Run
