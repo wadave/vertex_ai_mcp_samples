@@ -56,14 +56,15 @@ Here are some example questions you can ask the chatbot:
 ### Create & Activate Virtual Environment (Recommended):
 
 ```
-python -m venv .venv  # or uv venv .venv --python 3.12
+python -m venv .venv  
 source .venv/bin/activate
 ```
 
 ### Install the ADK library and dependencies:
 
 ```
-[uv] pip install google-adk fastapi uvicorn geopy
+pip install -r requirements.txt
+
 
 ```
 
