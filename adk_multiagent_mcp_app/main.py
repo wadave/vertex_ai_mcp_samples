@@ -2,24 +2,20 @@
 Main function to run FastAPI server.
 """
 
-from __future__ import annotations
-
 import asyncio
 import contextlib
 import json
 import logging
-from typing import Any
+from typing import Dict, List, Any, Optional
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, WebSocket
 from fastapi.staticfiles import StaticFiles
 from google.adk.agents.llm_agent import LlmAgent
-from google.adk.artifacts.in_memory_artifact_service import \
-    InMemoryArtifactService
+from google.adk.artifacts.in_memory_artifact_service import InMemoryArtifactService
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
-from google.adk.tools.mcp_tool.mcp_toolset import (MCPToolset,
-                                                   StdioServerParameters)
+from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StdioServerParameters
 from google.genai import types
 from pydantic import BaseModel
 from starlette.websockets import WebSocketDisconnect
@@ -28,7 +24,7 @@ from starlette.websockets import WebSocketDisconnect
 class AllServerConfigs(BaseModel):
     """Define a Pydantic model for server configurations."""
 
-    configs: dict[str, StdioServerParameters]
+    configs: Dict[str, StdioServerParameters]
 
 
 load_dotenv()
@@ -83,12 +79,12 @@ ROOT_AGENT_INSTRUCTION = """
 
 async def _collect_tools(
     server_config_dict: AllServerConfigs, master_stack: contextlib.AsyncExitStack
-) -> dict[str, Any]:
+) -> Dict[str, Any]:
     """Connects to servers, collects tools, and manages resources.
 
     Assumes MCPToolset.from_server exists and returns (tools, exit_stack).
     """
-    all_tools: dict[str, Any] = {}
+    all_tools: Dict[str, Any] = {}
     # Ensure server_config_dict has the expected structure, e.g., a .configs attribute
     if not hasattr(server_config_dict, "configs") or not isinstance(
         server_config_dict.configs, dict
@@ -97,7 +93,7 @@ async def _collect_tools(
         return {}  # Return empty if structure is wrong
 
     for key, server_params in server_config_dict.configs.items():
-        individual_exit_stack: contextlib.AsyncExitStack | None = None
+        individual_exit_stack: Optional[contextlib.AsyncExitStack] = None
         try:
             # *** Assumes MCPToolset is defined and imported ***
             tools, individual_exit_stack = await MCPToolset.from_server(
@@ -139,7 +135,7 @@ async def _collect_tools(
 
 
 # --- Helper Function for Agent Creation ---
-def _create_root_agent(all_tools: dict[str, Any]) -> LlmAgent:
+def _create_root_agent(all_tools: Dict[str, Any]) -> LlmAgent:
     """Creates the hierarchy of agents based on the collected tools.
 
     Assumes LlmAgent is defined and imported.
@@ -186,7 +182,7 @@ async def _run_agent_and_get_response(
     runner: Any,  # Replace Any with imported Runner type
     session_id: str,
     content: types.Content,  # Assuming types.Content is correct
-) -> list[str]:
+) -> List[str]:
     """Runs the agent asynchronously and collects model responses.
 
     Assumes Runner is defined and imported, and has run_async method.
@@ -219,7 +215,7 @@ async def _run_agent_and_get_response(
 # --- Main Function (Refactored) ---
 async def run_multi_agent(
     server_config_dict: AllServerConfigs, session_id: str, query: str
-) -> list[str]:
+) -> List[str]:
     """
     Runs the multi-agent system by collecting tools, creating agents,
     and processing the query.
@@ -228,7 +224,7 @@ async def run_multi_agent(
     are available in the execution environment.
     """
     content = types.Content(role="user", parts=[types.Part(text=query)])
-    response: list[str] = []  # Initialize clearly
+    response: List[str] = []  # Initialize clearly
 
     # Ensure necessary services are available (could also be passed as arguments)
     if artifacts_service is None or session_service is None:

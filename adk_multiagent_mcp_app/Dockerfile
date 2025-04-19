@@ -1,17 +1,11 @@
 FROM python:3.12-slim
-# Temporarily use default shell for installation
-# SHELL ["/bin/sh", "-o", "pipefail", "-c"]
+SHELL ["/bin/ash", "-o", "pipefail", "-c"]
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-# Install bash alongside other dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl=7.88.1-10+deb12u12 \
-    build-essential=12.9 \
-    # Install NodeSource repo for Node.js 20.x
+    curl=="7.81.0-1ubuntu1.10"  \
+    build-essential=="12.9ubuntu3" \
     && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    # Install pinned Node.js version
-    && apt-get install -y --no-install-recommends \
-    nodejs=20.19.0-1nodesource1 \
-    # Clean up APT caches
+    && apt-get install -y nodejs=="20.11.1-1nodesource1" --no-install-recommends \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 # Change the working directory to the `app` directory
 WORKDIR /app

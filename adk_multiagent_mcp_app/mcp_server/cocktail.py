@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, Dict, Optional
 
 import httpx
 from mcp.server.fastmcp import FastMCP
@@ -14,8 +12,8 @@ API_BASE_URL = "https://www.thecocktaildb.com/api/json/v1/1/"
 
 # --- Helper Functions ---
 async def make_cocktaildb_request(
-    endpoint: str, params: dict[str, str] | None = None
-) -> dict[str, Any] | None:
+    endpoint: str, params: Optional[Dict[str, str]] = None
+) -> Optional[Dict[str, Any]]:
     """Makes a request to TheCocktailDB API and returns the JSON response."""
     url = f"{API_BASE_URL}{endpoint}"
     try:
@@ -42,7 +40,7 @@ async def make_cocktaildb_request(
         return None
 
 
-def format_cocktail_summary(drink: dict[str, Any]) -> str:
+def format_cocktail_summary(drink: Dict[str, Any]) -> str:
     """Formats a cocktail dictionary into a readable summary string."""
     return (
         f"ID: {drink.get('idDrink', 'N/A')}\n"
@@ -55,7 +53,7 @@ def format_cocktail_summary(drink: dict[str, Any]) -> str:
     )
 
 
-def format_cocktail_details(drink: dict[str, Any]) -> str:
+def format_cocktail_details(drink: Dict[str, Any]) -> str:
     """Formats a cocktail dictionary into a detailed readable string."""
     details = [
         f"ID: {drink.get('idDrink', 'N/A')}",
@@ -86,7 +84,7 @@ def format_cocktail_details(drink: dict[str, Any]) -> str:
     return "\n".join(details)
 
 
-def format_ingredient(ingredient: dict[str, Any]) -> str:
+def format_ingredient(ingredient: Dict[str, Any]) -> str:
     """Formats an ingredient dictionary into a readable string."""
     desc = ingredient.get("strDescription", "No description available.")
     return (
