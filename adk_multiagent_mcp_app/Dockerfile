@@ -1,6 +1,6 @@
 FROM python:3.12-slim
 # Temporarily use default shell for installation
-# SHELL ["/bin/sh", "-o", "pipefail", "-c"]
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 # Install bash alongside other dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
