@@ -2,17 +2,12 @@
 Main function to run Root Agent.
 """
 
-import asyncio
 import contextlib
-import json
 import logging
 from typing import Any, Dict, Optional, List, Tuple
 
 from dotenv import load_dotenv
 from google.adk.agents.llm_agent import LlmAgent
-from google.adk.artifacts.in_memory_artifact_service import InMemoryArtifactService
-from google.adk.runners import Runner
-from google.adk.sessions import InMemorySessionService
 from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StdioServerParameters
 from google.genai import types
 from pydantic import BaseModel
@@ -20,15 +15,11 @@ from pydantic import BaseModel
 
 class AllServerConfigs(BaseModel):
     """Define a Pydantic model for server configurations."""
-
     configs: Dict[str, StdioServerParameters]
 
 
 load_dotenv()
 
-
-session_service = InMemorySessionService()
-artifacts_service = InMemoryArtifactService()
 
 # Create server parameters for stdio connection
 weather_server_params = StdioServerParameters(
@@ -83,21 +74,19 @@ async def _collect_tools_stack(
     (e.g., using 'async with' or calling 'await stack.aclose()')
     to ensure resource cleanup (like closing server connections).
 
-    Assumes MCPToolset.from_server exists and returns (tools, exit_stack).
-
     Args:
         server_config_dict: Configuration object containing server details.
 
     Returns:
         A tuple containing:
             - all_tools (Dict[str, Any]): Dictionary of collected tools.
-            - master_stack (contextlib.AsyncExitStack): The newly created stack
+            - exit_stack (contextlib.AsyncExitStack): The newly created stack
                         containing context managers for
                         server resources. Needs cleanup
                         by the caller.
     """
     all_tools: Dict[str, Any] = {}
-    # Create the master stack *inside* the function
+    # Create the master exit_stack *inside* the function
     exit_stack = contextlib.AsyncExitStack()
 
     # Flag to track if we successfully entered anything into the stack
@@ -158,8 +147,6 @@ async def _collect_tools_stack(
         if stack_needs_closing:
             await exit_stack.aclose()  # Clean up immediately on function error
         # Re-raise the exception or return an indicator of failure
-        # Returning the stack might be misleading if we closed it here.
-        # Option: return ({}, None) or raise - depends on desired error handling
         raise  # Re-raising is often cleaner
 
 
@@ -177,7 +164,6 @@ async def create_agent():
     ct_tools = all_tools.get("ct", [])
 
     # --- Agent Creation ---
-    # *** Assumes LlmAgent is defined and imported ***
     booking_agent = LlmAgent(
         model=MODEL_ID,
         name="booking_assistant",
