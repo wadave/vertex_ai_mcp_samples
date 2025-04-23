@@ -111,6 +111,7 @@ GOOGLE_CLOUD_LOCATION="us-central1"
 Navigate to the adk-web-ui directory in your terminal and run the application:
 
 ```bash
+source .venv/bin/activate
 adk web
 ```
 
