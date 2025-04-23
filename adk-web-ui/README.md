@@ -62,7 +62,7 @@ Here are some example questions you can ask the chatbot:
 Before running the application locally, ensure you have the following installed:
 
 1. **Node.js:** Required to run the Airbnb MCP server (if testing its functionality locally).
-2. **uv:** The Python package management tool used in this project. Follow the installation guide: [https://docs.astral.sh/uv/getting-started/installation/](https://docs.astral.sh/uv/getting-started/installation/)
+2. **(Optional) uv:** The Python package management tool used in this project. Follow the installation guide: [https://docs.astral.sh/uv/getting-started/installation/](https://docs.astral.sh/uv/getting-started/installation/)
 
 
 ## **1. Project Structure**
@@ -109,9 +109,17 @@ GOOGLE_CLOUD_LOCATION="us-central1"
 ## **3. Start the Application Locally**
 
 Navigate to the adk-web-ui directory in your terminal and run the application:
-
+- Option 1: Using uv
 ```bash
+uv sync
 source .venv/bin/activate
 adk web
 ```
 
+- Option 2: Without uv
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade google-adk geopy
+adk web
+``` 
