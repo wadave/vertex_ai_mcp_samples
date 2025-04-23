@@ -70,7 +70,7 @@ Before running the application locally, ensure you have the following installed:
 Ensure your project follows this structure:
 
 ```bash
-Your_project_folder/
+adk-web-ui/
 └── adk_multiagent_mcp_app/  # App folder
 │   ├── agent.py
 │   ├── __init__.py
@@ -89,7 +89,7 @@ Your_project_folder/
 
 ## **2. Configure Environment Variables**
 
-Create a `.env` file in the `adk_multiagent_mcp_app` directory with the following content. Replace placeholders with your actual values.
+Create a `.env` file in the `adk-web-ui` directory with the following content. Replace placeholders with your actual values.
 
 ```dotenv
 # Choose Model Backend: 0 -> ML Dev, 1 -> Vertex AI
