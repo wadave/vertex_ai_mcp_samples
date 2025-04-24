@@ -1,3 +1,7 @@
+"""
+Main function to run FastAPI server.
+"""
+
 import asyncio
 import contextlib
 import json
@@ -16,7 +20,6 @@ from google.genai import types
 from pydantic import BaseModel
 from starlette.websockets import WebSocketDisconnect
 
-# from starlette.types import Lifespan # Not strictly needed for definition
 
 # --- Configuration & Global Setup ---
 load_dotenv()
