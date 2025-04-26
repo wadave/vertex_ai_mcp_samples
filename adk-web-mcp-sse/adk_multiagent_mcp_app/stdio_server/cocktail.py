@@ -1,4 +1,5 @@
-from typing import Any, List, Dict, Optional
+from typing import Any, Dict, Optional
+
 import httpx
 from mcp.server.fastmcp import FastMCP
 
@@ -36,9 +37,6 @@ async def make_cocktaildb_request(
         return None
     except httpx.RequestError as e:
         print(f"An error occurred while requesting {e.request.url!r}: {e}")
-        return None
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
         return None
 
 

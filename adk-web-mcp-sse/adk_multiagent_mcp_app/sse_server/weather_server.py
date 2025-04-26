@@ -1,12 +1,14 @@
 import json
 from typing import Any, Dict, Optional
+
+from geopy.exc import GeocoderServiceError, GeocoderTimedOut
+from geopy.geocoders import Nominatim
 import httpx
 from mcp.server.fastmcp import FastMCP
-from geopy.geocoders import Nominatim
-from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 
 # Initialize FastMCP server
 mcp = FastMCP("weather")
+
 
 # --- Configuration & Constants ---
 BASE_URL = "https://api.weather.gov"
@@ -48,9 +50,6 @@ async def get_weather_response(endpoint: str) -> Optional[Dict[str, Any]]:
     except json.JSONDecodeError:
         # Response was not valid JSON
         return None
-    except Exception:
-        # Any other unexpected errors
-        return None
 
 
 def format_alert(feature: Dict[str, Any]) -> str:
@@ -74,7 +73,7 @@ def format_forecast_period(period: Dict[str, Any]) -> str:
     """Formats a single forecast period into a readable string."""
     return f"""
            {period.get('name', 'Unknown Period')}:
-             Temperature: {period.get('temperature', 'N/A')}°{period.get           ('temperatureUnit', 'F')}
+             Temperature: {period.get('temperature', 'N/A')}°{period.get('temperatureUnit', 'F')}
              Wind: {period.get('windSpeed', 'N/A')} {period.get('windDirection', 'N/A')}
              Short Forecast: {period.get('shortForecast', 'N/A')}
              Detailed Forecast: {period.get('detailedForecast', 'No detailed forecast            provided.').strip()}
@@ -82,6 +81,7 @@ def format_forecast_period(period: Dict[str, Any]) -> str:
 
 
 # --- MCP Tools ---
+
 
 @mcp.tool()
 async def get_alerts(state: str) -> str:
@@ -149,8 +149,6 @@ async def get_forecast(latitude: float, longitude: float) -> str:
         pass  # Error handled by returning None below
     except json.JSONDecodeError:
         pass  # Error handled by returning None below
-    except Exception:
-        pass  # Error handled by returning None below
 
     if forecast_data is None or "properties" not in forecast_data:
         return "Failed to retrieve detailed forecast data from NWS."
@@ -163,6 +161,7 @@ async def get_forecast(latitude: float, longitude: float) -> str:
     forecasts = [format_forecast_period(period) for period in periods[:5]]
 
     return "\n---\n".join(forecasts)
+
 
 # --- NEW: get_forecast_by_city Tool ---
 @mcp.tool()
@@ -200,9 +199,6 @@ async def get_forecast_by_city(city: str, state: str) -> str:
         return f"Could not get coordinates for '{city_name}, {state_code}': The location service timed out."
     except GeocoderServiceError:
         return f"Could not get coordinates for '{city_name}, {state_code}': The location service returned an error."
-    except Exception:
-        # Catch any other unexpected errors during geocoding
-        return f"An unexpected error occurred while finding coordinates for '{city_name}, {state_code}'."
 
     # --- Handle Geocoding Result ---
     if location is None:
@@ -216,10 +212,11 @@ async def get_forecast_by_city(city: str, state: str) -> str:
 
 
 # --- Server Execution & Shutdown ---
-async def shutdown_event():
+async def shutdown_event() -> None:
     """Gracefully close the httpx client."""
     await http_client.aclose()
     # print("HTTP client closed.") # Optional print statement if desired
 
+
 if __name__ == "__main__":
-    mcp.run(transport="stdio")
+    mcp.run(transport="sse")

@@ -1,0 +1,7 @@
+debugpy
+fastapi
+httpx[http2]
+geopy
+google-adk
+mcp[cli]
+uvicorn[standard]
