@@ -10,7 +10,7 @@ Note: The below parameters need to match with the values in .env file.
 
 ```bash
 # Define a name for your Cloud Run service
-export SERVICE_NAME='weather-mcp-server2'
+export SERVICE_NAME='weather-mcp-server'
 
 # Specify the Google Cloud region for deployment (ensure it supports required services)
 export LOCATION='us-central1'
