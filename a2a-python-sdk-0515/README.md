@@ -25,14 +25,19 @@ Before running the application locally, ensure you have the following installed:
 3. **set up .env**  
 
 - create .env file in `examples/airbnb_agent` and `examples/weater_agent`folder with the following content
+```bash
 GOOGLE_API_KEY="your_api_key_here" 
+```
 
 - create .env file in `examples/host_agent/adk_agent`folder with the following content:
+
+```bash
 GOOGLE_GENAI_USE_VERTEXAI=TRUE
 GOOGLE_CLOUD_PROJECT="your project"
 GOOGLE_CLOUD_LOCATION=us-central1
 AIR_AGENT_URL=http://localhost:10002
 WEA_AGENT_URL=http://localhost:10001
+```
 
 ## Install SDK
 Go to `a2a-python-sdk-0515` folder in terminal:
