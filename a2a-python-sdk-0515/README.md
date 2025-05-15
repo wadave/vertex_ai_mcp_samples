@@ -1,6 +1,7 @@
 # Build Agents using A2A SDK (Prototype)
 ----
 > *⚠️ DISCLAIMER: THIS IS A PERSONAL PROJECT. THIS PROJECT IS INTENDED FOR DEMONSTRATION PURPOSES ONLY. IT IS NOT INTENDED FOR USE IN A PRODUCTION ENVIRONMENT.* 
+> *⚠️ Important: A2A is a work in progress (WIP) thus, in the near future there might be changes that are different from what demonstrated here. This project was build on 5/15/2025*
 ----
 
 This document describes a web application demonstrating the integration of Google's Agent to Agent (A2A), Agent Development Kit (ADK) for multi-agent orchestration with Model Context Protocol (MCP) clients. The application features a host agent coordinating tasks between remote agents that interact with various MCP servers to fulfill user requests.
