@@ -1,6 +1,7 @@
 # Build Agents using A2A SDK (Prototype)
 ----
-> *⚠️ DISCLAIMER: THIS IS A PERSONAL PROJECT. THIS PROJECT IS INTENDED FOR DEMONSTRATION PURPOSES ONLY. IT IS NOT INTENDED FOR USE IN A PRODUCTION ENVIRONMENT.* 
+> *⚠️ DISCLAIMER: THIS IS A PERSONAL PROJECT. THIS PROJECT IS INTENDED FOR DEMONSTRATION PURPOSES ONLY. IT IS NOT INTENDED FOR USE IN A PRODUCTION ENVIRONMENT.*  
+
 > *⚠️ Important: A2A is a work in progress (WIP) thus, in the near future there might be changes that are different from what demonstrated here. This project was build on 5/15/2025*
 ----
 
@@ -81,8 +82,9 @@ python routing_agent_demo.py
 
 Here're example questions:
 
-"Tell me about weather in LA, CA"
-"Please find a bedroom in LA, CA, June 20-25, 2025"
+- "Tell me about weather in LA, CA"  
+
+- "Please find a bedroom in LA, CA, June 20-25, 2025"
 
 ## References
 - https://github.com/google/a2a-python
