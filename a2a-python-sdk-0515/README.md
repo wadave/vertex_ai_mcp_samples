@@ -1,6 +1,6 @@
 # Build Agents using A2A SDK (Prototype)
 ----
-> *⚠️ DISCLAIMER: THIS IS NOT AN OFFICIALLY SUPPORTED GOOGLE PRODUCT. THIS PROJECT IS INTENDED FOR DEMONSTRATION PURPOSES ONLY. IT IS NOT INTENDED FOR USE IN A PRODUCTION ENVIRONMENT.* 
+> *⚠️ DISCLAIMER: THIS IS A PERSONAL PROJECT. THIS PROJECT IS INTENDED FOR DEMONSTRATION PURPOSES ONLY. IT IS NOT INTENDED FOR USE IN A PRODUCTION ENVIRONMENT.* 
 ----
 
 This document describes a web application demonstrating the integration of Google's Agent to Agent (A2A), Agent Development Kit (ADK) for multi-agent orchestration with Model Context Protocol (MCP) clients. The application features a host agent coordinating tasks between remote agents that interact with various MCP servers to fulfill user requests.
@@ -75,6 +75,13 @@ cd examples/host_agent
 pip install -e .[dev]
 python routing_agent_demo.py
 ```
+
+## 4. Test at the UI
+
+Here're example questions:
+
+"Tell me about weather in LA, CA"
+"Please find a bedroom in LA, CA, June 20-25, 2025"
 
 ## References
 - https://github.com/google/a2a-python
