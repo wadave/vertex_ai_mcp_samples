@@ -16,7 +16,7 @@ from a2a.types import (
 )
 import traceback
 
-AGENT_URL = "http://localhost:10002"
+AGENT_URL = "http://localhost:10001"
 
 def create_send_message_payload(
     text: str, task_id: str | None = None, context_id: str | None = None
@@ -51,7 +51,7 @@ async def run_single_turn_test(client: A2AClient) -> None:
     """Runs a single-turn non-streaming test."""
 
     send_payload = create_send_message_payload(
-        text='Please find a bedroom in new york city, June 15-20, 2025'
+        text='Please tell me weather in LA, CA'
     )
     request = SendMessageRequest(params=MessageSendParams(**send_payload))
 
