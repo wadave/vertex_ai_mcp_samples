@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "geopy>=2.4.1",
-    "google-adk>=0.2.0",
+    "google-adk>=1.0.0",
 ]
 
 [tool.uv.workspace]

@@ -6,18 +6,6 @@ Screenshot:
 
 <img src="../asset/adk_app.png" alt="Descriptive alt text" width="700" />
 
-### Create & Activate Virtual Environment (Recommended):
-
-```
-python -m venv .venv
-source .venv/bin/activate
-```
-
-### Install ADK:
-
-```
-pip install google-adk fastapi
-```
 
 Project Structure
 
@@ -29,6 +17,8 @@ your_project_folder/  # Project folder
     ├── mcp_server
     │   └── cocktail.py
     ├── README.md
+    ├── pyproject.toml
+    ├── uv.lock
     └── static
         └── index.html
 ```
@@ -71,7 +61,7 @@ GOOGLE_CLOUD_LOCATION="us-central1"
 2.  Run the below command
 
 ```
-uvicorn main:app --reload
+uv run uvicorn main:app --reload --port 8002
 ```
 
 The example shows you can chat with the app to get cocktail details from the cocktail db website via a local MCP server.

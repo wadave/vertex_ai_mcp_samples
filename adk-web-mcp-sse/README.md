@@ -118,17 +118,6 @@ Go to `adk_multiagent_mcp_app/sse_server` folder, follow the `README.md` to set 
 ## **4. Start the Application Locally**
 
 Navigate to the adk-web-ui directory in your terminal and run the application:
-- Option 1: Using uv
 ```bash
-uv sync
-source .venv/bin/activate
-adk web
+uv run adk web --port 8001
 ```
-
-- Option 2: Without uv
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install --upgrade google-adk geopy
-adk web
-``` 
