@@ -6,10 +6,9 @@ Screenshot:
 
 <img src="../asset/adk_app.png" alt="Descriptive alt text" width="700" />
 
-
 Project Structure
 
-```
+```bash
 your_project_folder/  # Project folder
 |── adk_mcp_app
     ├── main.py
@@ -27,11 +26,11 @@ your_project_folder/  # Project folder
 
 Start the Fast API: Run the following command within the `adk_mcp_app` folder
 
-1. Set up values in `.env ` file
+1. Set up values in `.env` file
 
 Create a .env file with the following contents:
 
-```
+```bash
 # Choose Model Backend: 0 -> ML Dev, 1 -> Vertex
 GOOGLE_GENAI_USE_VERTEXAI=1
 
@@ -45,22 +44,22 @@ GOOGLE_CLOUD_LOCATION="us-central1"
 
 If using Google API key:
 
-```
+```bash
 GOOGLE_GENAI_USE_VERTEXAI=0
 GOOGLE_API_KEY=YOUR_VALUE_HERE
 ```
 
 If using Vertex AI Project ID:
 
-```
+```bash
 GOOGLE_GENAI_USE_VERTEXAI=1
 GOOGLE_CLOUD_PROJECT=YOUR_VALUE_HERE
 GOOGLE_CLOUD_LOCATION="us-central1"
 ```
 
-2.  Run the below command
+2. Run the below command
 
-```
+```bash
 uv run uvicorn main:app --reload --port 8002
 ```
 
